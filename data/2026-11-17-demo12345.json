@@ -1,0 +1,28 @@
+{
+  "title": "Core Plays",
+  "date": "Tuesday, November 17",
+  "slate": "Sample data",
+  "updated": "2026-11-17T18:00:00Z",
+  "tz": "ET",
+  "positions": ["PG", "SG", "SF", "PF", "C"],
+  "b2b": ["CHI"],
+  "plays": [
+    {"player": "Sample Guard One", "team": "BOS", "opp": "@CHI", "pos": "PG", "dkPos": "PG", "fdPos": "PG", "dk": 8800, "fd": 9000, "proj": 46.5, "type": "Core", "status": "A", "blurb": "**Sample note.** Replace this text with your own analysis."},
+    {"player": "Sample Guard Two", "team": "CHI", "opp": "BOS", "pos": "SG", "dkPos": "SG", "fdPos": "SG", "dk": 6400, "fd": 6600, "proj": 34.2, "type": "Core", "status": "Q", "blurb": "Another **sample note**."},
+    {"player": "Sample Center One", "team": "DEN", "opp": "@MIA", "pos": "C", "dkPos": "C", "fdPos": "C", "dk": 10200, "fd": 10500, "proj": 58.1, "type": "Core", "status": "A", "blurb": "Sample center note."}
+  ],
+  "playsFd": [
+    {"player": "Sample Guard One", "team": "BOS", "opp": "@CHI", "pos": "PG", "dkPos": "PG", "fdPos": "PG", "dk": 8800, "fd": 9000, "proj": 46.5, "type": "Core", "status": "A", "blurb": "**Sample note.** FanDuel version."},
+    {"player": "Sample Center One", "team": "DEN", "opp": "@MIA", "pos": "C", "dkPos": "C", "fdPos": "C", "dk": 10200, "fd": 10500, "proj": 58.1, "type": "Core", "status": "A", "blurb": "Sample center note."}
+  ],
+  "injuries": [
+    {"player": "Sample Forward Out", "team": "MIA", "status": "OUT", "note": "Sample injury note.", "impact": 6, "updated": "2026-11-17T17:30:00Z"}
+  ],
+  "news": [
+    {"player": "Sample Guard Two", "team": "CHI", "time": "5:45 PM", "status": "Q", "note": "Sample injury news item."}
+  ],
+  "games": [
+    {"away": "BOS", "home": "CHI", "fav": "BOS", "spread": 4.5, "total": 228.5, "time": "7:30 PM", "min": 1170, "dk": "M", "fd": "M"},
+    {"away": "DEN", "home": "MIA", "fav": "DEN", "spread": 2.5, "total": 221.0, "time": "8:00 PM", "min": 1200, "dk": "M", "fd": "M"}
+  ]
+}
