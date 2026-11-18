@@ -1,6 +1,6 @@
 {
  "title": "NBA Core Plays",
- "updated": "2026-11-18T16:47-05:00",
+ "updated": "2026-11-18T16:48-05:00",
  "stage_date": "2026-11-18",
  "sites": {
   "dk": {
@@ -10,9 +10,27 @@
      "plays": [
       {
        "rank": "1",
-       "player": "Cade Cunningham",
+       "player": "Nolan Traore",
        "tag": "Strong",
        "notes": "He aight.",
+       "pos": "SG/SF",
+       "team": "BKN",
+       "opp": "CHI",
+       "salary": "4800",
+       "proj": "25.7",
+       "found": true,
+       "minutes": 26.74,
+       "status": "B",
+       "order": 2,
+       "spread": -2.5,
+       "total": 239.5,
+       "ml": -142.0
+      },
+      {
+       "rank": "2",
+       "player": "Cade Cunningham",
+       "tag": "",
+       "notes": "",
        "pos": "PG",
        "team": "DET",
        "opp": "NOP",
@@ -27,7 +45,7 @@
        "ml": -191.0
       },
       {
-       "rank": "2",
+       "rank": "3",
        "player": "Immanuel Quickley",
        "tag": "",
        "notes": "",
@@ -45,7 +63,7 @@
        "ml": -191.0
       },
       {
-       "rank": "3",
+       "rank": "4",
        "player": "Daniss Jenkins",
        "tag": "",
        "notes": "",
@@ -63,7 +81,7 @@
        "ml": -191.0
       },
       {
-       "rank": "4",
+       "rank": "5",
        "player": "James Harden",
        "tag": "",
        "notes": "",
@@ -81,7 +99,7 @@
        "ml": -196.0
       },
       {
-       "rank": "5",
+       "rank": "6",
        "player": "Tyler Herro",
        "tag": "",
        "notes": "",
