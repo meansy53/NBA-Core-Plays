@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NBA Core Plays</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7f9; --line: #e3e6eb; --ink: #14181f; --muted: #667085;
+    --navy: #06184a; --accent: #fe6a03;
+    --core: #15803d; --strong: #1d4ed8; --large: #7c3aed;
+    --good: #15803d; --warn: #d4a106; --bad: #b91c1c;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151c; --panel: #1b202a; --line: #2a303c; --ink: #e8eaf0; --muted: #97a0b3;
+      --core: #22c55e; --strong: #3b82f6; --large: #a78bfa;
+      --good: #4ade80; --warn: #fbbf24; --bad: #f87171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151c; --panel: #1b202a; --line: #2a303c; --ink: #e8eaf0; --muted: #97a0b3;
+    --core: #22c55e; --strong: #3b82f6; --large: #a78bfa;
+    --good: #4ade80; --warn: #fbbf24; --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 14px 16px 18px; }
+
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: -0.2px; }
+  .sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .datesel { margin-top: 8px; max-width: 100%; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 12.5px; }
+
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  .tabs { display: flex; gap: 2px; background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 3px; overflow-x: auto; max-width: 100%; }
+  .tab, .seg button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .tab.on, .seg button.on { background: var(--navy); color: #fff; }
+  :root[data-theme="dark"] .tab.on, :root[data-theme="dark"] .seg button.on { background: #3b5bdb; }
+  :root[data-theme="dark"] .views { border-bottom-color: #3b5bdb; }
+  :root[data-theme="dark"] .views button.on { background: #3b5bdb; border-color: #3b5bdb; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .tab.on, :root:not([data-theme="light"]) .seg button.on { background: #3b5bdb; }
+    :root:not([data-theme="light"]) .views { border-bottom-color: #3b5bdb; }
+    :root:not([data-theme="light"]) .views button.on { background: #3b5bdb; border-color: #3b5bdb; }
+  }
+  .seg { display: flex; background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+  .grow { flex: 1; }
+  #sort { display: none; }
+  select, input[type=search] { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+  label.chk { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; cursor: pointer; }
+
+  .group-h { display: flex; align-items: baseline; gap: 8px; margin: 18px 0 6px; padding-bottom: 5px; border-bottom: 2px solid var(--accent); }
+  .group-h h2 { margin: 0; font-size: 15px; color: var(--navy); letter-spacing: .4px; }
+  :root[data-theme="dark"] .group-h h2 { color: #e8eaf0; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .group-h h2 { color: #e8eaf0; } }
+  .group-h span { color: var(--muted); font-size: 12px; }
+
+  .cols { display: grid; grid-template-columns: 28px minmax(150px, 0.6fr) 66px 62px 66px 54px 54px 3.4fr; gap: 10px; padding: 6px 10px 6px 14px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+  .row { display: grid; grid-template-columns: 28px minmax(150px, 0.6fr) 66px 62px 66px 54px 54px 3.4fr; gap: 10px; align-items: start; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); margin-bottom: 6px; }
+  .row:hover { background: var(--panel); }
+  .row[data-t=Core] { border-left: 4px solid var(--core); }
+  .rank { color: var(--muted); font-weight: 700; padding-top: 2px; }
+  .who { display: flex; gap: 9px; align-items: center; min-width: 0; }
+  .logo { flex: 0 0 34px; width: 34px; height: 34px; object-fit: contain; }
+  .logo[hidden] { display: none; }
+  .nm { font-weight: 700; line-height: 1.2; }
+  .mt { color: var(--muted); font-size: 12px; }
+  .pill { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; color: #fff; letter-spacing: .3px; vertical-align: 1px; }
+  .t-Core { background: var(--core); }
+  :root[data-theme="dark"] .pill[class*="t-"] { color: #0b1220; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill[class*="t-"] { color: #0b1220; } }
+  .oppcell { display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; padding-top: 1px; white-space: nowrap; }
+  .mopp { display: none; }
+  .typecell { text-align: center; padding-top: 1px; }
+  .mtype { display: none; }
+  .cols .s { cursor: pointer; user-select: none; }
+  .cols .s:hover, .cols .s.on { color: var(--ink); }
+  .cols .s .ar { position: absolute; margin-left: 3px; font-size: 9px; }
+  .st { margin-left: 4px; background: transparent; border: 1px solid currentColor; }
+  .st.good { color: var(--good); } .st.warn { color: var(--warn); } .st.bad { color: var(--bad); } .st.neutral { color: var(--muted); }
+  .num { font-variant-numeric: tabular-nums; text-align: right; padding-top: 2px; }
+  .num.ctr { text-align: center; }
+  .num small { display: none; color: var(--muted); font-size: 10.5px; }
+  .val-hi { color: var(--good); font-weight: 700; }
+  .blurb { color: var(--ink); opacity: .92; }
+  .blurb strong { font-weight: 700; }
+  .empty { padding: 28px; text-align: center; color: var(--muted); }
+  footer { margin-top: 14px; color: var(--muted); font-size: 11.5px; }
+
+  .upd { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; color: var(--accent); background: rgba(254,106,3,.10); border: 1px solid rgba(254,106,3,.35); border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+  .upd .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(254,106,3,.6); animation: pulse 2s infinite; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 7px rgba(254,106,3,0); } 100% { box-shadow: 0 0 0 0 rgba(254,106,3,0); } }
+  @media (prefers-reduced-motion: reduce) { .upd .dot { animation: none; } }
+  .hright { display: flex; align-items: center; gap: 10px; }
+  .themebtn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; font-size: 17px; line-height: 1; display: grid; place-items: center; }
+  .themebtn:hover { border-color: var(--accent); }
+  .hqlink { font-weight: 700; font-size: 13px; color: #fff; background: #06184a; border: 1px solid #06184a; text-decoration: none; padding: 6px 14px; border-radius: 999px; white-space: nowrap; }
+  .hqlink:hover { filter: brightness(1.25); }
+  :root[data-theme="dark"] .hqlink { background: #3b5bdb; border-color: #3b5bdb; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hqlink { background: #3b5bdb; border-color: #3b5bdb; } }
+  .nm a { color: inherit; text-decoration: none; }
+  .nm a:hover { color: var(--accent); text-decoration: underline; }
+  .pill.out { background: var(--bad); border-color: var(--bad); color: #fff; margin-left: 4px; }
+  .row.is-out { opacity: .62; }
+  .row.is-out .nm a, .row.is-out .nm > span { text-decoration: line-through; }
+  .outwarn { background: rgba(185,28,28,.10); border: 1px solid rgba(185,28,28,.4); color: var(--bad); border-radius: 8px; padding: 8px 12px; margin: 0 0 10px; font-weight: 600; font-size: 13px; }
+  /* Tabs, filters and column headers stay pinned while the rows scroll (inside the iframe). */
+  .stick { position: sticky; top: 0; z-index: 30; background: var(--bg); padding-top: 6px; }
+  .stick .views { margin-top: 0; }
+  #colhead .cols { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .views { display: flex; gap: 6px; border-bottom: 3px solid var(--navy); margin: 4px 0 14px; }
+  .views button { font: inherit; font-size: 17px; white-space: nowrap; font-weight: 800; letter-spacing: -.2px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-bottom: 0; padding: 11px 18px; border-radius: 12px 12px 0 0; cursor: pointer; display: flex; align-items: center; gap: 9px; }
+  .views button:hover { color: var(--ink); }
+  .views button.on { color: #fff; background: var(--navy); border-color: var(--navy); box-shadow: inset 0 -4px 0 var(--accent); padding-bottom: 15px; margin-bottom: -3px; }
+  .views .cnt { background: var(--bad); color: #fff; border-radius: 999px; font-size: 12px; font-weight: 700; padding: 1px 8px; }
+  .views .cnt.plain { background: rgba(127,127,127,.22); color: inherit; }
+  .views button.on .cnt.plain { background: rgba(255,255,255,.2); }
+  .cols.inj { padding-left: 11px; }
+  .cols.inj, .row.inj { grid-template-columns: minmax(170px, 1fr) 100px 1.3fr 1.7fr; }
+  .cols.inj.hasSlate, .row.inj.hasSlate { grid-template-columns: minmax(170px, 1fr) 100px 150px 1.3fr 1.7fr; }
+  .inj-slate { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+  .inj-slate .sl { font-size: 10.5px; font-weight: 700; color: var(--muted); margin: 0 2px 3px 2px; }
+  .inj-slate .sb { margin: 0 4px 3px 0; padding: 2px 8px; min-width: 24px; }
+  .row.inj .nm { font-size: 14px; }
+  .inj-impact { font-weight: 700; }
+  .imp { display: inline-block; min-width: 34px; text-align: center; padding: 3px 10px; border-radius: 999px; font-size: 14px; font-weight: 700; }
+  .imp.hi { background: var(--bad); color: #fff; }
+  .imp.mid { background: #e8a317; color: #1a1300; }
+  .imp.lo { background: rgba(127,127,127,.25); color: inherit; }
+  .imp.none { opacity: .5; }
+  .cols.news { padding-left: 11px; }
+  .cols.news, .row.news { grid-template-columns: minmax(200px, 1fr) 100px 90px 3fr; }
+  .news-time { font-weight: 600; white-space: nowrap; }
+  .row.news .nm { font-size: 14px; }
+  body.inj-view #foot, body.news-view #foot { display: none; }
+  body.news-view .play-only, body.news-view #sort { display: none !important; }
+  .pill.new { background: var(--accent); margin-left: 4px; }
+  body.inj-view .play-only, body.inj-view #sort { display: none !important; }
+  body:not(.inj-view) .inj-only { display: none !important; }
+
+  @media (max-width: 700px) {
+    .row.inj, .row.inj.hasSlate { grid-template-columns: 1fr auto; }
+    .row.inj .inj-slate { grid-column: 1 / -1; }
+    .row.inj .inj-note { grid-column: 1 / -1; }
+    .row.inj .inj-impact::before { content: "Impact "; font-weight: 600; opacity: .7; }
+    .row.news { grid-template-columns: 1fr auto auto; gap: 8px; }
+    .row.news .inj-note { grid-column: 1 / -1; }
+    .cols { display: none; }
+    /* On phones only the main tabs stay pinned, so the filters don't eat the screen. */
+    .stick { display: contents; }
+    .views { position: sticky; top: 0; z-index: 30; background: var(--bg); padding-top: 6px; flex-wrap: wrap; }
+    .views button { font-size: 16px; padding: 9px 14px; }
+    .views button.on { padding-bottom: 13px; }
+    .hright .upd { font-size: 12px; padding: 4px 10px; }
+    .row { grid-template-columns: 24px 1fr auto auto auto; row-gap: 6px; }
+    .typecell, .oppcell { display: none; }
+    .mopp { display: inline; }
+    .mtype { display: inline-block; }
+    #sort { display: block; }
+    .who { grid-column: 2 / 3; }
+    .blurb { grid-column: 1 / -1; }
+    .num { text-align: right; }
+    .num.ctr { text-align: center; }
+    .num small { display: block; }
+    }
+
+  /* RG MVP teaser (preview mode) */
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #06184a, #12308c); color: #fff; border-radius: 14px; padding: 14px 18px; margin: 4px 0 14px; border: 1px solid #243c8f; }
+  .cta b { display: block; font-size: 16px; }
+  .cta span { font-size: 13px; opacity: .9; }
+  .cta a, .lockmsg a { background: var(--accent); color: #06184a; text-decoration: none; font-weight: 800; padding: 9px 16px; border-radius: 8px; white-space: nowrap; }
+  .cta code { background: rgba(255,255,255,.16); padding: 1px 6px; border-radius: 4px; }
+  .lockwrap { position: relative; margin: 0 0 14px; }
+  .ghost { filter: blur(6px); opacity: .55; user-select: none; pointer-events: none; }
+  .gcard { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: center; padding: 12px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); margin-bottom: 6px; }
+  .gcard .gdot { width: 26px; height: 26px; border-radius: 50%; background: var(--line); }
+  .gbar { height: 11px; border-radius: 6px; background: var(--line); margin: 6px 0; }
+  .lockmsg { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 12px; }
+  .lockmsg div { font-weight: 700; text-shadow: 0 0 8px var(--bg), 0 0 8px var(--bg); }
+
+  /* Schedule tab */
+  .sch-only { display: none; }
+  body.sch-view .sch-only { display: flex; }
+  body.sch-view .play-only, body.sch-view #sort { display: none !important; }
+  .cols.gm, .row.gm { grid-template-columns: 76px minmax(140px, 1.3fr) minmax(140px, 1.3fr) 96px 62px 92px 92px; }
+  .cols.gm { padding-left: 14px; }
+  .row.gm { align-items: center; }
+  .gm small { display: none; color: var(--muted); font-size: 10.5px; }
+  .g-time { font-weight: 700; }
+  .g-team { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .g-team .logo { flex: 0 0 30px; width: 30px; height: 30px; }
+  .g-team .tn { font-weight: 700; line-height: 1.2; }
+  .g-team .ti { color: var(--ink); font-weight: 700; font-size: 12px; margin-top: 1px; white-space: nowrap; }
+  .g-team .ti.hi { color: var(--ink); font-weight: 700; }
+  .g-line, .g-tot { font-weight: 700; }
+  .sb { display: inline-block; min-width: 30px; text-align: center; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); margin: 0 4px 3px 0; white-space: nowrap; }
+  .sb.m, .sb.l, .sb.s, .sb.e { color: #fff; }
+  .sb.e { border-color: #6b7280; background: #000; }
+  .sb.m { border-color: #f97316; background: #f97316; }
+  .sb.l { border-color: #16a34a; background: #16a34a; }
+  .sb.s { border-color: #2563eb; background: #2563eb; }
+  .sb.none { color: var(--muted); font-weight: 600; }
+  .b2b { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .3px; padding: 1px 7px; margin-left: 6px; border-radius: 999px; background: #c62828; color: #fff; vertical-align: 1px; white-space: nowrap; }
+  .row.gm.dim { opacity: .45; }
+  /* Schedule tab: same table look as the First Look (navy header, green rule, red-to-blue shaded totals), with team logos */
+  .schwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  .schtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .schtable thead th { background: #1a2744; color: #fff; text-transform: uppercase; letter-spacing: .4px; font-size: 11px; font-weight: 700; padding: 12px 6px; text-align: center; white-space: nowrap; border-bottom: 3px solid #7fcf8f; }
+  .schtable th.l, .schtable td.tm { text-align: left; }
+  .schtable tbody td { padding: 6px 6px; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  .schtable tbody tr:nth-child(even) td:not(.sc) { background: var(--panel); }
+  .schtable td.sc { font-weight: 500; }
+  .schtable td.tm .tn { font-weight: 700; }
+  .schtable tr.dim { opacity: .45; }
+  .schtable .sb { margin: 0; }
+  .schtable .g-team .logo { flex: 0 0 24px; width: 24px; height: 24px; }
+  .schtable .g-team { gap: 7px; }
+  body.sch-view #foot { display: none; }
+
+  @media (max-width: 700px) {
+    .row.gm { grid-template-columns: repeat(12, 1fr); row-gap: 10px; }
+    .row.gm .g-time { grid-column: 1 / -1; }
+    .row.gm .g-team { grid-column: span 6; }
+    .row.gm .g-line, .row.gm .g-tot { grid-column: span 6; text-align: left; }
+    .row.gm .g-sl { grid-column: span 6; }
+    .gm small { display: block; }
+    .row.gm .g-time { color: var(--muted); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1 id="title">Core Plays</h1>
+      <div class="sub" id="sub"></div>
+      <select id="dateSel" class="datesel" style="display:none" aria-label="Past slates"></select>
+    </div>
+    <div class="hright">
+      <div class="upd" id="upd" style="display:none"><span class="dot"></span><span id="updText"></span></div>
+      <button class="themebtn" id="themeBtn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"></button>
+    </div>
+  </header>
+
+  <div class="stick" id="stick">
+  <div class="views" id="views">
+    <button data-v="sch" id="schBtn" style="display:none">Schedule<span class="cnt plain" id="schCnt" style="display:none"></span></button>
+    <button data-v="dk">DK Core Plays<span class="cnt plain" id="dkCnt" style="display:none"></span></button>
+    <button data-v="fd">FD Core Plays<span class="cnt plain" id="fdCnt" style="display:none"></span></button>
+    <button data-v="news" id="newsBtn" style="display:none">Injury News<span class="cnt" id="newsCnt" style="display:none"></span></button>
+    <button data-v="inj">All Injuries<span class="cnt plain" id="injCnt" style="display:none"></span></button>
+  </div>
+
+  <div class="controls">
+    <div class="tabs play-only" id="tagTabs"></div>
+    <div class="tabs play-only" id="tabs"></div>
+    <select id="sort" class="play-only" aria-label="Sort">
+      <option value="rank">Our order</option>
+      <option value="proj">Projection</option>
+      <option value="value">Value</option>
+    </select>
+    <div class="tabs inj-only" id="statusTabs"></div>
+    <select id="injSlate" class="inj-only" aria-label="Slate" style="display:none"></select>
+    <select id="injTeam" class="inj-only" aria-label="Team" style="display:none"></select>
+    <div class="tabs sch-only" id="slateTabs"></div>
+    <span class="grow"></span>
+    <a class="hqlink" id="hqLink" href="https://rotogrinders.com/lineuphq/nba?site=draftkings" target="_blank" rel="noopener">Build lineups in LineupHQ ↗</a>
+  </div>
+  <div id="colhead"></div>
+  </div>
+
+  <div id="outWarn"></div>
+  <div id="list"></div>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+// ?date=yyyy-mm-dd loads that day's archive file; no date = the newest slate (data.json).
+const reqDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") || "") ? params.get("date") : "";
+// ?preview=1 loads the free teaser files (data-preview.json / data/<date>-preview.json) instead of the full table.
+const PREVIEW = params.get("preview") === "1";
+// The full table lives at an unlisted file name: data/<date>-<key>.json, and the link carries ?date=...&k=<key>.
+// The key is random and made by the publish script, so the full file can't be found by guessing dates.
+const reqKey = /^[a-z0-9]{8,64}$/i.test(params.get("k") || "") ? params.get("k") : "";
+const DATA_FILE = PREVIEW ? (reqDate ? "data/" + reqDate + "-preview.json" : "data-preview.json")
+                          : (reqDate && reqKey ? "data/" + reqDate + "-" + reqKey + ".json" : "");
+// Theme: ?theme= wins, then the reader's saved choice, otherwise dark.
+let savedTheme = null;
+try { savedTheme = localStorage.getItem("cp-theme"); } catch (e) {}
+// Default is dark; the reader's own toggle (saved) or ?theme= overrides it.
+const startTheme = params.get("theme") || savedTheme;
+document.documentElement.dataset.theme = (startTheme === "light") ? "light" : "dark";
+const isDark = () => document.documentElement.dataset.theme
+  ? document.documentElement.dataset.theme === "dark"
+  : matchMedia("(prefers-color-scheme: dark)").matches;
+function paintThemeBtn() { $("themeBtn").textContent = isDark() ? "☀" : "☾"; $("themeBtn").title = isDark() ? "Switch to light mode" : "Switch to dark mode"; }
+
+const POS_NAMES = { PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center" };
+const state = { pos: "ALL", site: params.get("site") === "fd" ? "fd" : "dk", sort: "rank", dir: "desc", q: "", type: "", view: "plays", status: "", slate: "", team: "", injSlate: "" };
+let DATA = null;
+
+const $ = id => document.getElementById(id);
+// Team logos are loaded by abbreviation from the image host below, so the Team/Opp values in the sheet must match its
+// file names (e.g. .../nba/PHI.png). Missing logos simply don't show.
+const LOGO_PATH = abbr => `https://rical-images.s3.amazonaws.com/team-logos/nba/${abbr}.png`;
+// Teams on the second night of a back-to-back tonight (DATA.b2b, from the publisher): a small red B2B badge next to the team.
+const b2bBadge = t => (DATA && Array.isArray(DATA.b2b) && DATA.b2b.includes(String(t || "").toUpperCase())) ? '<span class="b2b" title="Second night of a back-to-back">B2B</span>' : "";
+const logoImg = t => t ? `<img class="logo" src="${esc(LOGO_PATH(String(t).toUpperCase()))}" alt="" loading="lazy" onerror="this.hidden=true">` : "";
+const fmtMoney = n => n ? "$" + Number(n).toLocaleString() : "–";
+const initials = n => n.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+// Blurb markup: **bold** only. Everything else is escaped.
+function blurbHtml(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); }
+
+// Only "Core" is a tag now; anything else (blank, GPP, Strong...) shows no badge.
+function tagOf(p) { const t = String(p.type || p.tier || "").trim(); return /^core/i.test(t) ? "Core" : ""; }
+
+// ---- name matching (same idea as the NFL players.json: lowercase, letters/numbers only)
+const nameKey = n => String(n || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+const nameKeys = n => { const k = nameKey(n); return [k, k.replace(/(jr|sr|ii|iii|iv)$/, "")]; };
+
+// ---- RG player pages. players.json maps a name key to either "slug-id" or a full URL.
+// If your NBA pages live somewhere other than /players/, change PLAYER_BASE.
+const PLAYER_BASE = "https://rotogrinders.com/players/";
+let PLAYERS = {};
+function playerUrl(p) {
+  if (p.url) return p.url;
+  for (const k of nameKeys(p.player)) {
+    const v = PLAYERS[k];
+    if (v) return /^https?:/.test(v) ? v : PLAYER_BASE + v;
+  }
+  return "";
+}
+function nameHtml(p) {
+  const u = playerUrl(p);
+  return u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(p.player)}</a>` : `<span>${esc(p.player)}</span>`;
+}
+
+// ---- auto OUT: any play whose player is OUT on the Injuries tab
+let OUT = new Map();
+function buildOut() {
+  OUT = new Map();
+  (DATA.injuries || []).forEach(i => {
+    if (/^\s*out/i.test(String(i.status || ""))) nameKeys(i.player).forEach(k => OUT.set(k, i));
+  });
+}
+function outEntry(p) { for (const k of nameKeys(p.player)) if (OUT.has(k)) return OUT.get(k); return null; }
+
+function statusClass(s) {
+  const u = String(s).toUpperCase();
+  if (/^(OUT|O$|DOUBT|IR)/.test(u)) return "bad";
+  if (/^(A$|ACTIVE|P$|PROB)/.test(u)) return "good";   // active / probable: green
+  if (/^(Q|GTD|DTD)/.test(u)) return "warn";
+  if (/^(BOOST|UP|▲|START)/.test(u)) return "good";
+  return "neutral";
+}
+
+function salary(p) { return Number(state.site === "dk" ? p.dk : p.fd) || 0; }
+function valueOf(p) { const s = salary(p); return s ? Number(p.proj) / (s / 1000) : 0; }
+
+function rowEl(p, rank, valCut) {
+  const el = document.createElement("div");
+  const type = tagOf(p);
+  el.className = "row";
+  el.dataset.t = type;
+  const oe = outEntry(p);
+  if (oe) el.classList.add("is-out");
+  const outPill = oe && !/^\s*out/i.test(String(p.status || "")) ? `<span class="pill out" title="${esc(oe.note || "Listed OUT")}">OUT</span>` : "";
+  const st = p.status ? `<span class="pill st ${statusClass(p.status)}">${esc(p.status)}</span>` : "";
+  const tier = type ? `<span class="pill t-${esc(type)}">${esc(type)}</span>` : "";
+  const v = valueOf(p);
+  el.innerHTML = `
+    <div class="rank">${rank}</div>
+    <div class="who">
+      ${logoImg(p.team)}
+      <div>
+        <div class="nm">${nameHtml(p)}</div>
+        <div class="mt">${esc((state.site === "fd" ? p.fdPos : p.dkPos) || p.pos)} · ${esc(p.team)}${b2bBadge(p.team)}<span class="mopp"> ${esc(p.opp)}</span> <span class="mtype">${tier}</span>${outPill}${st}</div>
+      </div>
+    </div>
+    <div class="oppcell"><span>${esc(p.opp)}</span></div>
+    <div class="typecell">${tier}</div>
+    <div class="num ctr"><small>Salary</small>${fmtMoney(salary(p))}</div>
+    <div class="num ctr"><small>Proj</small>${p.proj ? Number(p.proj).toFixed(1) : "–"}</div>
+    <div class="num ctr ${v >= valCut ? "val-hi" : ""}"><small>Value</small>${v ? v.toFixed(2) + "x" : "–"}</div>
+    <div class="blurb">${blurbHtml(p.blurb)}</div>`;
+  return el;
+}
+
+function sorted(list) {
+  const idx = new Map(DATA.plays.map((p, i) => [p, i]));
+  const m = state.dir === "asc" ? 1 : -1;
+  const by = {
+    rank: (a, b) => idx.get(a) - idx.get(b),
+    proj: (a, b) => m * (a.proj - b.proj),
+    value: (a, b) => m * (valueOf(a) - valueOf(b))
+  }[state.sort];
+  return [...list].sort(by);
+}
+
+let STATUSES = [];
+function buildChips(id, values, get, set, allLabel) {
+  const el = $(id);
+  el.innerHTML = "";
+  values.forEach(v => {
+    const b = document.createElement("button");
+    b.className = "tab" + (get() === v ? " on" : "");
+    b.textContent = v === "" ? allLabel : v;
+    b.onclick = () => { set(v); buildChips(id, values, get, set, allLabel); render(); };
+    el.appendChild(b);
+  });
+}
+
+function setSort(k) {
+  if (k === "rank") { state.sort = "rank"; state.dir = "desc"; }
+  else if (state.sort === k) state.dir = state.dir === "desc" ? "asc" : "desc";
+  else { state.sort = k; state.dir = "desc"; }
+  $("sort").value = state.sort;
+  render();
+}
+
+function fmtUpdated(u) {
+  if (!u) return { text: "", fresh: false };
+  const d = new Date(u);
+  if (isNaN(d) || !/\d{4}-\d\d-\d\d/.test(u)) return { text: String(u), fresh: false };
+  return { text: d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }), fresh: Date.now() - d.getTime() < 2 * 3600e3 && Date.now() >= d.getTime() };
+}
+
+function impactHtml(v) {
+  if (v === null || v === undefined || v === "" || isNaN(Number(v))) return '<span class="imp none">–</span>';
+  const n = Number(v), t = n >= 7 ? "hi" : n >= 4 ? "mid" : "lo";
+  return `<span class="imp ${t}">${Number.isInteger(n) ? n : n.toFixed(1)}</span>`;
+}
+
+// A News row can leave Team blank: look the player up on the Injuries tab, then the Core Plays tables.
+function teamFor(i) {
+  if (i.team) return String(i.team).toUpperCase();
+  const pools = [DATA.injuries || [], DATA.plays || [], DATA.playsFd || []];
+  const keys = nameKeys(i.player);
+  for (const pool of pools) for (const p of pool) {
+    if (p.team && nameKeys(p.player).some(k => keys.includes(k))) return String(p.team).toUpperCase();
+  }
+  // Last resort: the PLAYERS tab (every player in the league), published as DATA.teams = [[name, team], ...]
+  if (DATA.teams && DATA.teams.length) {
+    if (!DATA._teamMap) { DATA._teamMap = new Map(); DATA.teams.forEach(([n, t]) => nameKeys(n).forEach(k => { if (!DATA._teamMap.has(k)) DATA._teamMap.set(k, String(t).toUpperCase()); })); }
+    for (const k of keys) if (DATA._teamMap.has(k)) return DATA._teamMap.get(k);
+  }
+  return "";
+}
+
+function renderNews() {
+  $("outWarn").innerHTML = "";
+  $("colhead").innerHTML = "";
+  const q = state.q.trim().toLowerCase();
+  const list = $("list");
+  list.innerHTML = "";
+  // Newest first: sort by the Time (ET) value; rows with the same (or no) time keep the sheet order with later rows on top.
+  const tmin = t => { const m = String(t || "").match(/(\d{1,2}):(\d{2})\s*([ap])?/i); if (!m) return -1; let h = +m[1] % 12; if (m[3] ? m[3].toLowerCase() === "p" : +m[1] >= 12) h += 12; return h * 60 + +m[2]; };
+  const items = (DATA.news || []).map((i, idx) => ({ i, idx, t: tmin(i.time) })).sort((a, b) => b.t - a.t || b.idx - a.idx).map(x => x.i)
+    .filter(i => !q || (i.player + " " + i.team + " " + i.note).toLowerCase().includes(q));
+  if (!items.length) { list.innerHTML = '<div class="empty">No injury news yet.</div>'; postHeight(); return; }
+  const h = document.createElement("div");
+  h.className = "cols news";
+  h.innerHTML = "<div>Player</div><div>Time (ET)</div><div>Status</div><div>Injury note</div>";
+  $("colhead").appendChild(h);
+  items.forEach(i => {
+    const el = document.createElement("div");
+    el.className = "row news";
+    const tm = teamFor(i);
+    el.innerHTML = `
+      <div class="who">${logoImg(tm)}<div><div class="nm">${nameHtml(i)}</div><div class="mt">${esc(tm)}</div></div></div>
+      <div class="news-time">${esc(i.time || "")}</div>
+      <div>${i.status ? `<span class="pill st ${statusClass(i.status)}" style="margin-left:0">${esc(i.status)}</span>` : ""}</div>
+      <div class="inj-note">${esc(i.note)}</div>`;
+    list.appendChild(el);
+  });
+  postHeight();
+}
+
+// The slate(s) a player's team is on tonight, from the GAMES tab: { dk, fd } or null if the team has no game.
+function slatesFor(team) {
+  const t = String(team || "").toUpperCase();
+  const g = (DATA.games || []).find(x => abbrOf(x.away) === t || abbrOf(x.home) === t);
+  return g ? { dk: g.dk, fd: g.fd } : null;
+}
+const SLATE_ORDER = ["M", "E", "L", "S"], SLATE_NAMES = { M: "Main", E: "Early", L: "Late", S: "Showdown" };
+function buildInjSlate() {
+  const sel = $("injSlate");
+  const seen = { dk: new Set(), fd: new Set() };
+  (DATA.games || []).forEach(g => ["dk", "fd"].forEach(site => { const v = String(g[site] ?? "").trim(); if (v && !/^(n|no|0|-|–)$/i.test(v)) seen[site].add(slateInfo(v)[0]); }));
+  const opts = [];
+  ["dk", "fd"].forEach(site => [...SLATE_ORDER, ...[...seen[site]].filter(l => !SLATE_ORDER.includes(l))].forEach(l => {
+    if (seen[site].has(l)) opts.push(`<option value="${site}:${esc(l)}">${site === "dk" ? "DK" : "FD"} ${esc(SLATE_NAMES[l] || l)}</option>`);
+  }));
+  sel.innerHTML = '<option value="">All slates</option>' + opts.join("");
+  sel.style.display = opts.length ? "" : "none";
+  sel.onchange = () => { state.injSlate = sel.value; render(); };
+}
+
+function renderInj() {
+  $("outWarn").innerHTML = "";
+  $("colhead").innerHTML = "";
+  const q = state.q.trim().toLowerCase();
+  const list = $("list");
+  list.innerHTML = "";
+  const items = (DATA.injuries || []).filter(i =>
+    (!state.status || String(i.status || "").toUpperCase().startsWith(state.status)) &&
+    (!state.team || String(i.team || "").toUpperCase() === state.team) &&
+    (!state.injSlate || (() => { const [site, letter] = state.injSlate.split(":"); const sl = slatesFor(i.team); return !!sl && !!String(sl[site] ?? "").trim() && slateInfo(sl[site])[0] === letter; })()) &&
+    (!q || (i.player + " " + i.team + " " + i.note).toLowerCase().includes(q)));
+  if (!items.length) { list.innerHTML = '<div class="empty">No injuries listed.</div>'; postHeight(); return; }
+  const h = document.createElement("div");
+  const hasSlate = !!(DATA.games && DATA.games.length);
+  h.className = "cols inj" + (hasSlate ? " hasSlate" : "");
+  h.innerHTML = "<div>Player</div><div>Status</div>" + (hasSlate ? "<div>Slate</div>" : "") + "<div>Injury / note</div><div>Impact (0-10)</div>";
+  $("colhead").appendChild(h);
+  items.forEach(i => {
+    const u = fmtUpdated(i.updated);
+    const el = document.createElement("div");
+    el.className = "row inj" + (hasSlate ? " hasSlate" : "");
+    const sl = hasSlate ? slatesFor(i.team) : null;
+    const slateCell = hasSlate ? `<div class="inj-slate">${sl ? `<span class="sl">DK</span>${slateBadge("dk", sl.dk) || '<span class="sb none">–</span>'}<span class="sl">FD</span>${slateBadge("fd", sl.fd) || '<span class="sb none">–</span>'}` : '<span class="sb none" title="No game on this slate">–</span>'}</div>` : "";
+    el.innerHTML = `
+      <div class="who">${logoImg(i.team)}<div><div class="nm">${nameHtml(i)}</div><div class="mt">${esc(i.team)}</div></div></div>
+      <div>${i.status ? `<span class="pill st ${statusClass(i.status)}" style="margin-left:0">${esc(i.status)}</span>` : ""}${u.fresh ? '<span class="pill new">NEW</span>' : ""}</div>
+      ${slateCell}
+      <div class="inj-note">${esc(i.note)}</div>
+      <div class="inj-impact">${impactHtml(i.impact)}</div>`;
+    list.appendChild(el);
+  });
+  postHeight();
+}
+
+// ---- Schedule tab: games, spread, total, implied team totals, and which main slate (DK / FD) each game is on ----
+// The GAMES tab can use abbreviations (CHI) or names (Chicago, Chicago Bulls); this maps either to the logo abbreviation.
+const NBA_TEAMS = {
+  ATL: "atlanta hawks|atlanta|hawks", BOS: "boston celtics|boston|celtics", BKN: "brooklyn nets|brooklyn|nets|bk|bro",
+  CHA: "charlotte hornets|charlotte|hornets", CHI: "chicago bulls|chicago|bulls", CLE: "cleveland cavaliers|cleveland|cavaliers|cavs",
+  DAL: "dallas mavericks|dallas|mavericks|mavs", DEN: "denver nuggets|denver|nuggets", DET: "detroit pistons|detroit|pistons",
+  GSW: "golden state warriors|golden state|warriors|gs", HOU: "houston rockets|houston|rockets", IND: "indiana pacers|indiana|pacers",
+  LAC: "la clippers|los angeles clippers|clippers|la", LAL: "los angeles lakers|la lakers|lakers|los angeles",
+  MEM: "memphis grizzlies|memphis|grizzlies", MIA: "miami heat|miami|heat", MIL: "milwaukee bucks|milwaukee|bucks",
+  MIN: "minnesota timberwolves|minnesota|timberwolves|wolves", NOP: "new orleans pelicans|new orleans|pelicans|no|nola",
+  NYK: "new york knicks|new york|knicks|ny", OKC: "oklahoma city thunder|oklahoma city|thunder", ORL: "orlando magic|orlando|magic",
+  PHI: "philadelphia 76ers|philadelphia|76ers|sixers", PHO: "phoenix suns|phoenix|suns|phx", POR: "portland trail blazers|portland|trail blazers|blazers",
+  SAC: "sacramento kings|sacramento|kings", SAS: "san antonio spurs|san antonio|spurs|sa", TOR: "toronto raptors|toronto|raptors",
+  UTA: "utah jazz|utah|jazz", WAS: "washington wizards|washington|wizards|wsh"
+};
+const TEAM_KEY = {};
+Object.entries(NBA_TEAMS).forEach(([ab, names]) => { TEAM_KEY[nameKey(ab)] = ab; names.split("|").forEach(n => { TEAM_KEY[nameKey(n)] = ab; }); });
+const abbrOf = t => TEAM_KEY[nameKey(t)] || String(t || "").toUpperCase();
+function impliedOf(g) {
+  const total = Number(g.total) || 0, sp = Math.abs(Number(g.spread) || 0);
+  const fav = abbrOf(g.fav);
+  if (!total) return { away: 0, home: 0 };
+  const hi = (total + sp) / 2, lo = (total - sp) / 2;
+  if (g.fav && fav === abbrOf(g.away)) return { away: hi, home: lo };
+  if (g.fav && fav === abbrOf(g.home)) return { away: lo, home: hi };
+  return { away: total / 2, home: total / 2 };
+}
+const slateInfo = v => {
+  const raw = String(v ?? "").trim(), s = raw.toLowerCase();
+  if (/^(y|yes|x|true|1|✓|m|main)$/.test(s)) return ["M", "Main"];
+  if (/^l(ate)?$|^late/.test(s)) return ["L", "Late"];
+  if (/^(s|sd)$|^show/.test(s)) return ["S", "Showdown"];
+  if (/^e(arly)?$|^early/.test(s)) return ["E", "Early"];
+  return [raw.charAt(0).toUpperCase(), raw];
+};
+const slateBadge = (kind, v) => {
+  const s = String(v ?? "").trim();
+  if (!s || /^(n|no|0|-|–)$/i.test(s)) return "";
+  const info = slateInfo(s);   // M = Main, L = Late, S = Showdown, E = Early (anything else shows its first letter)
+  return `<span class="sb ${kind} ${info[0].toLowerCase()}" title="${esc(info[1])}">${esc(info[0])}</span>`;
+};
+function buildSlateTabs() {
+  const el = $("slateTabs");
+  el.innerHTML = "";
+  [["", "All games"], ["dk", "DK Main Slate"], ["fd", "FD Main Slate"]].forEach(([v, label]) => {
+    const b = document.createElement("button");
+    b.className = "tab" + (state.slate === v ? " on" : "");
+    b.textContent = label;
+    b.onclick = () => { state.slate = v; buildSlateTabs(); render(); };
+    el.appendChild(b);
+  });
+}
+// Same red-to-blue scale as the First Look tables (low = red, high = blue).
+const SCH_STOPS = [[0,[178,24,43]],[1/6,[239,138,98]],[2/6,[253,219,199]],[3/6,[247,247,247]],[4/6,[209,229,240]],[5/6,[103,169,207]],[1,[33,102,172]]];
+function schColor(p) {
+  p = Math.max(0, Math.min(1, p));
+  let lo = SCH_STOPS[0], hi = SCH_STOPS[SCH_STOPS.length - 1];
+  for (let i = 0; i < SCH_STOPS.length - 1; i++) if (p >= SCH_STOPS[i][0] && p <= SCH_STOPS[i + 1][0]) { lo = SCH_STOPS[i]; hi = SCH_STOPS[i + 1]; break; }
+  const t = (p - lo[0]) / ((hi[0] - lo[0]) || 1);
+  const c = [0, 1, 2].map(k => Math.round(lo[1][k] + (hi[1][k] - lo[1][k]) * t));
+  return { bg: `rgb(${c})`, fg: (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) > 150 ? "#000" : "#fff" };
+}
+// Percentile of each value within a pool of values; ties share a percentile.
+function schPct(pool, v) {
+  const n = pool.length;
+  if (n < 2) return 0.5;
+  const lo = pool.filter(x => x < v).length, eq = pool.filter(x => x === v).length;
+  return (lo + (eq - 1) / 2) / (n - 1);
+}
+function renderSch() {
+  $("outWarn").innerHTML = "";
+  $("colhead").innerHTML = "";
+  const list = $("list");
+  list.innerHTML = "";
+  const games = [...(DATA.games || [])].sort((a, b) => (a.min ?? 9999) - (b.min ?? 9999));
+  if (!games.length) { list.innerHTML = '<div class="empty">No schedule posted yet.</div>'; postHeight(); return; }
+  const tz = DATA.tz || "ET";
+  const rows = games.map(g => ({ g, imp: impliedOf(g), total: Number(g.total) || 0 }));
+  const totals = rows.map(r => r.total).filter(Boolean);
+  const teamPool = rows.flatMap(r => [r.imp.away, r.imp.home]).filter(Boolean);   // road and home totals share one scale
+  const cell = (v, pool) => {
+    if (!v) return '<td>–</td>';
+    const c = schColor(schPct(pool, v));
+    return `<td class="sc" style="background:${c.bg};color:${c.fg}">${v.toFixed(1)}</td>`;
+  };
+  const team = (name, hi) => `<td class="tm"><div class="g-team">${logoImg(abbrOf(name))}<span class="tn">${esc(name)}</span>${b2bBadge(abbrOf(name))}</div></td>`;
+  const sl = (kind, v) => slateBadge(kind, v) || '<span class="sb none">–</span>';
+  let html = `<div class="schwrap"><table class="schtable"><thead><tr><th class="l">Road Team</th><th class="l">Home Team</th><th>Favorite</th><th>Spread</th><th>Game Total</th><th>Road Total</th><th>Home Total</th><th>Time (${esc(tz)})</th><th>DK Slate</th><th>FD Slate</th></tr></thead><tbody>`;
+  rows.forEach(({ g, imp, total }) => {
+    if (state.slate && slateInfo(g[state.slate])[0] !== "M") return;   // DK / FD Main Slate: show only that site's Main games
+    const inSlate = true;
+    const sp = Math.abs(Number(g.spread) || 0), fav = abbrOf(g.fav);
+    html += `<tr class="${inSlate ? "" : "dim"}">${team(g.away)}${team(g.home)}<td>${sp && g.fav ? esc(fav) : (total ? "PK" : "–")}</td><td>${sp && g.fav ? "-" + sp.toFixed(1) : (total ? "0.0" : "–")}</td>${cell(total, totals)}${cell(imp.away, teamPool)}${cell(imp.home, teamPool)}<td>${esc(g.time || "")}</td><td>${sl("dk", g.dk)}</td><td>${sl("fd", g.fd)}</td></tr>`;
+  });
+  html += "</tbody></table></div>";
+  list.innerHTML = html;
+  postHeight();
+}
+
+// Tabs: DK Core Plays / FD Core Plays / Schedule / Injuries. The two Core Plays tabs share one view ("plays") and differ by site.
+function activeTab() { return state.view === "plays" ? state.site : state.view; }
+function setView(v) {
+  if (v === "dk" || v === "fd") { state.site = v; state.view = "plays"; applySite(); }
+  else state.view = v;
+  document.body.classList.toggle("inj-view", state.view === "inj");
+  document.body.classList.toggle("sch-view", state.view === "sch");
+  document.body.classList.toggle("news-view", state.view === "news");
+  document.querySelectorAll("#views button").forEach(b => b.classList.toggle("on", b.dataset.v === activeTab()));
+  $("hqLink").href = "https://rotogrinders.com/lineuphq/nba?site=" + (state.site === "fd" ? "fanduel" : "draftkings");
+  render();
+}
+
+let SITE_PLAYS = null, SITE_LOCKED = null;
+// Points the table at the selected site's ranking (and its locked counts in the free preview).
+function applySite() {
+  if (!SITE_PLAYS) return;
+  DATA.plays = SITE_PLAYS[state.site] || [];
+  if (DATA.preview && SITE_LOCKED) DATA.preview.locked = SITE_LOCKED[state.site];
+  ["dk", "fd"].forEach(k => {
+    const lk = PREVIEW && SITE_LOCKED && SITE_LOCKED[k] ? Object.values(SITE_LOCKED[k]).reduce((x, y) => x + (Number(y) || 0), 0) : 0;
+    const n = (SITE_PLAYS[k] || []).length + lk;
+    $(k + "Cnt").textContent = n; $(k + "Cnt").style.display = n ? "" : "none";
+  });
+}
+
+function render() {
+  if (state.view === "inj") return renderInj();
+  if (state.view === "news") return renderNews();
+  if (state.view === "sch") return renderSch();
+  const q = state.q.trim().toLowerCase();
+  let plays = DATA.plays.filter(p =>
+    (state.pos === "ALL" || p.pos === state.pos) &&
+    (!state.type || tagOf(p) === state.type) &&
+    (!q || (p.player + " " + p.team + " " + p.opp + " " + p.blurb).toLowerCase().includes(q)));
+  const vals = DATA.plays.map(valueOf).filter(Boolean).sort((a, b) => b - a);
+  const valCut = vals[Math.floor(vals.length * 0.2)] || Infinity; // top 20% highlighted
+
+  const P = PREVIEW && DATA.preview ? DATA.preview : null;
+  const lockedFor = g => P && P.locked ? (Number(P.locked[g]) || 0) : 0;
+  const ctaUrl = P ? esc(P.ctaUrl || "https://rotogrinders.com/products/999/purchase?term=monthly&promo=mvparticle") : "";
+  const list = $("list");
+  list.innerHTML = "";
+  $("colhead").innerHTML = "";
+  if (P) list.insertAdjacentHTML("beforeend", `<div class="cta"><div><b>${esc(P.ctaLabel || "Unlock every Core Play with RG MVP")}</b><span>${esc(P.ctaBlurb || "See all of today's Core Plays, projections and notes at every position.")}${P.code ? ` Use code <code>${esc(P.code)}</code>` : ""}</span></div><a href="${ctaUrl}" target="_top">Join RG MVP</a></div>`);
+  const outNow = DATA.plays.filter(outEntry);
+  $("outWarn").innerHTML = outNow.length
+    ? `<div class="outwarn">⚠ Listed OUT: ${outNow.map(p => esc(p.player)).join(", ")}. Check the Injuries tab before locking these in.</div>` : "";
+  if (!plays.length) { list.innerHTML = '<div class="empty">No plays match.</div>'; return; }
+
+  const header = () => {
+    const h = document.createElement("div");
+    h.className = "cols";
+    const ar = k => `<span class="ar">${state.sort === k ? (state.dir === "asc" ? "▲" : "▼") : ""}</span>`;
+    const on = k => state.sort === k ? " on" : "";
+    h.innerHTML = `<div class="s${on("rank")}" data-k="rank" title="Back to our order">#</div><div style="text-align:center">Player</div><div style="text-align:center">Opp</div><div style="text-align:center">Tag</div><div style="text-align:center">Salary</div>` +
+      `<div class="s${on("proj")}" data-k="proj" style="text-align:center" title="Sort by projection">Proj${ar("proj")}</div>` +
+      `<div class="s${on("value")}" data-k="value" style="text-align:center" title="Sort by value">Value${ar("value")}</div><div>Player Notes</div>`;
+    h.querySelectorAll(".s").forEach(el => el.onclick = () => setSort(el.dataset.k));
+    return h;
+  };
+
+  $("colhead").appendChild(header());
+  const groups = state.pos === "ALL" ? DATA.positions : [state.pos];
+  for (const g of groups) {
+    const items = sorted(plays.filter(p => p.pos === g));
+    if (!items.length) continue;
+    if (state.pos === "ALL") {
+      const h = document.createElement("div");
+      h.className = "group-h";
+      const tot = items.length + lockedFor(g);
+    h.innerHTML = `<h2>${esc(POS_NAMES[g] || g)}</h2><span>${tot} play${tot > 1 ? "s" : ""}</span>`;
+      list.appendChild(h);
+    }
+    items.forEach((p, i) => list.appendChild(rowEl(p, i + 1, valCut)));
+    const nl = lockedFor(g);
+    if (nl && !state.q && !state.type) {
+      const ghosts = Array.from({ length: Math.min(nl, 3) }, () => `<div class="gcard"><div class="gdot"></div><div><div class="gbar" style="width:34%"></div><div class="gbar" style="width:92%"></div><div class="gbar" style="width:66%"></div></div></div>`).join("");
+      list.insertAdjacentHTML("beforeend", `<div class="lockwrap"><div class="ghost">${ghosts}</div><div class="lockmsg"><div>🔒 ${nl} more ${esc(POS_NAMES[g] || g)} play${nl > 1 ? "s" : ""} for RG MVP members</div><a href="${ctaUrl}" target="_top">Unlock all Core Plays</a></div></div>`);
+    }
+  }
+  if (P) list.insertAdjacentHTML("beforeend", `<div class="cta"><div><b>${esc(P.ctaLabel || "Unlock every Core Play with RG MVP")}</b><span>Full slate, projections and notes at every position.</span></div><a href="${ctaUrl}" target="_top">Join RG MVP</a></div>`);
+  postHeight();
+}
+
+function buildTabs() {
+  const tabs = $("tabs");
+  tabs.innerHTML = "";
+  ["ALL", ...DATA.positions].forEach(p => {
+    const b = document.createElement("button");
+    b.className = "tab" + (state.pos === p ? " on" : "");
+    b.textContent = p === "ALL" ? "All" : p;
+    b.onclick = () => { state.pos = p; buildTabs(); render(); };
+    tabs.appendChild(b);
+  });
+}
+
+function postHeight() {
+  const h = document.documentElement.scrollHeight;
+  try { parent.postMessage({ type: "core-plays-height", height: h }, "*"); } catch (e) {}
+}
+
+fetch("players.json?v=" + Date.now()).then(r => r.ok ? r.json() : {}).catch(() => ({})).then(pj => { PLAYERS = pj || {}; if (!DATA_FILE) throw new Error("This link is missing its date or access key."); return fetch(DATA_FILE + "?v=" + Date.now()); }).then(r => { if (!r.ok) throw new Error(DATA_FILE + " not found (HTTP " + r.status + ")"); return r.json(); }).then(d => {
+  DATA = d;
+  d.plays = d.plays || []; d.injuries = d.injuries || []; d.news = d.news || [];
+  // One ranking per site: d.plays = DraftKings, d.playsFd = FanDuel (falls back to the same list for older files).
+  SITE_PLAYS = { dk: d.plays, fd: Array.isArray(d.playsFd) ? d.playsFd : d.plays };
+  SITE_LOCKED = d.preview ? { dk: d.preview.locked, fd: d.preview.lockedFd || d.preview.locked } : null;
+  buildOut();
+  if (!DATA.positions || !DATA.positions.length) DATA.positions = [...new Set(DATA.plays.map(p => p.pos))];
+  $("title").textContent = d.title || "Core Plays";
+  const upd = d.updated ? new Date(d.updated) : null;
+  $("sub").textContent = [d.date, d.slate].filter(Boolean).join(" · ");
+  if (upd && !isNaN(upd)) {
+    // Always shown in Eastern time, whatever the reader's own time zone is.
+    const ET = { timeZone: "America/New_York" };
+    const sameDay = upd.toLocaleDateString("en-US", ET) === new Date().toLocaleDateString("en-US", ET);
+    const t = upd.toLocaleTimeString("en-US", { ...ET, hour: "numeric", minute: "2-digit" }) + " ET";
+    $("updText").textContent = "Updated " + (sameDay ? "" : upd.toLocaleDateString("en-US", { ...ET, weekday: "short" }) + " ") + t;
+    $("upd").style.display = "";
+  }
+  $("hqLink").href = "https://rotogrinders.com/lineuphq/nba?site=" + (state.site === "fd" ? "fanduel" : "draftkings");
+  $("foot").textContent = "Value = projected points per $1K of salary (top 20% highlighted).";
+  applySite();
+  const inj = d.injuries || [];
+  if (inj.length) { $("injCnt").textContent = inj.length; $("injCnt").style.display = ""; }
+  // blank statuses used to add a second "All" button, so drop them
+  STATUSES = ["", ...new Set(inj.map(i => String(i.status || "").split(/\s|-/)[0].toUpperCase()).filter(Boolean))];
+  const teams = [...new Set(inj.map(i => String(i.team || "").toUpperCase()).filter(Boolean))].sort();
+  const ts = $("injTeam");
+  ts.innerHTML = '<option value="">All teams</option>' + teams.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
+  ts.style.display = teams.length ? "" : "none";
+  ts.onchange = () => { state.team = ts.value; render(); };
+  buildInjSlate();
+  buildChips("statusTabs", STATUSES, () => state.status, v => { state.status = v; }, "All");
+  buildChips("tagTabs", ["", "Core"], () => state.type, v => { state.type = v; }, "All");
+  const hasGames = Array.isArray(d.games) && d.games.length > 0;
+  if (hasGames) { $("schBtn").style.display = ""; $("schCnt").textContent = d.games.length; $("schCnt").style.display = ""; }
+  if (hasGames) state.view = "sch";
+  const news = d.news || [];
+  if (news.length) { $("newsBtn").style.display = ""; $("newsCnt").textContent = news.length; $("newsCnt").style.display = ""; }
+  if (params.get("view") === "injuries") state.view = "inj";
+  if (params.get("view") === "news" && news.length) state.view = "news";
+  if (params.get("view") === "plays" || params.get("site")) state.view = "plays";
+  if (params.get("view") === "schedule" && hasGames) state.view = "sch";
+  buildSlateTabs();
+  document.body.classList.toggle("inj-view", state.view === "inj");
+  document.body.classList.toggle("sch-view", state.view === "sch");
+  document.body.classList.toggle("news-view", state.view === "news");
+  document.querySelectorAll("#views button").forEach(b => b.classList.toggle("on", b.dataset.v === activeTab()));
+  buildTabs(); render();
+  // "Past slates" menu, built from data/index.json (hidden if there's only one slate)
+  fetch("data/index.json?v=" + Date.now()).then(r => r.ok ? r.json() : []).catch(() => []).then(list => {
+    if (!Array.isArray(list) || list.length < 2 || !PREVIEW || params.get("menu") !== "1") return;
+    const cur = reqDate || d.iso || list[0].date;
+    const sel = $("dateSel");
+    sel.innerHTML = list.map(e => '<option value="' + esc(e.date) + '"' + (e.date === cur ? " selected" : "") + ">" + esc(e.label || e.date) + "</option>").join("");
+    sel.style.display = "";
+    sel.onchange = () => { params.set("date", sel.value); location.search = params.toString(); };
+  });
+}).catch(e => { console.error(e); $("list").innerHTML = '<div class="empty">Could not load this slate.<br><small>' + esc(e && e.message || e) + '</small></div>'; });
+
+$("sort").onchange = e => { state.sort = e.target.value; state.dir = "desc"; render(); };
+document.querySelectorAll("#views button").forEach(b => b.onclick = () => setView(b.dataset.v));
+$("themeBtn").onclick = () => {
+  const next = isDark() ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("cp-theme", next); } catch (e) {}
+  paintThemeBtn();
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", paintThemeBtn);
+paintThemeBtn();
+new ResizeObserver(postHeight).observe(document.body);
+</script>
+</body>
+</html>
