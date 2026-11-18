@@ -11,15 +11,15 @@
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #ffffff; --panel: #ECF0F2; --line: #d3dae0; --ink: #06184A; --muted: #5b6785;
-    --navy: #06184A; --silver: #ECF0F2; --accent: #FE6A03; --core: #15803d; --bad: #b91c1c;
-    --head-bg: #06184A; --head-ink: #ffffff; --btn-ink: #06184A;
+    --bg: #ffffff; --panel: #f4f6fa; --line: #e1e5ec; --ink: #131a26; --muted: #627086;
+    --navy: #0b1f4f; --accent: #fe6a03; --core: #15803d; --bad: #b91c1c;
+    --head-bg: #0b1f4f; --head-ink: #ffffff;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #06184A; --panel: #0d2663; --line: #21367a; --ink: #ECF0F2; --muted: #a8b5d6;
-      --navy: #06184A; --silver: #ECF0F2; --accent: #FE6A03; --core: #34d399; --bad: #ff8a8a;
-      --head-bg: #FE6A03; --head-ink: #06184A; --btn-ink: #06184A;
+      --bg: #10141c; --panel: #1a202b; --line: #2a3140; --ink: #eef1f6; --muted: #9aa5b8;
+      --navy: #0b1f4f; --accent: #ff7a1f; --core: #34d399; --bad: #f87171;
+      --head-bg: #243a82; --head-ink: #ffffff;
     }
   }
   * { box-sizing: border-box; }
@@ -37,18 +37,8 @@
     padding: 7px 18px; border-radius: 999px; cursor: pointer; }
   .tab[aria-selected="true"] { background: var(--head-bg); color: var(--head-ink); }
   .tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  .grow { flex: 1; display: flex; justify-content: center; min-width: 0; }
-  .upd { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--ink);
-    background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
-  .upd[hidden] { display: none; }
-  .upd .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: 0 0 8px; }
-  .posbar { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
-  .pos { appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font: inherit; font-weight: 700;
-    padding: 6px 16px; border-radius: 999px; cursor: pointer; min-width: 52px; }
-  .pos:hover { color: var(--ink); }
-  .pos[aria-pressed="true"] { background: var(--head-bg); border-color: var(--head-bg); color: var(--head-ink); }
-  .pos:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  .hq { background: var(--accent); color: var(--btn-ink); text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
+  .grow { flex: 1; }
+  .hq { background: var(--accent); color: #1a0d00; text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
   .hq:hover { filter: brightness(1.08); }
   .hq:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
@@ -102,7 +92,7 @@
 <div class="wrap">
   <header>
     <h1 id="title">NBA Core Plays</h1>
-    <div class="sub" id="sub"></div>
+    <div class="sub" id="sub">Our favorite plays by position.</div>
   </header>
 
   <div class="bar">
@@ -110,17 +100,8 @@
       <button class="tab" role="tab" id="tab-dk" data-site="dk" aria-selected="true">DraftKings</button>
       <button class="tab" role="tab" id="tab-fd" data-site="fd" aria-selected="false">FanDuel</button>
     </div>
-    <div class="grow"><span class="upd" id="upd" hidden><span class="dot" aria-hidden="true"></span><span id="updText"></span></span></div>
+    <span class="grow"></span>
     <a class="hq" id="hq" href="https://rotogrinders.com/lineuphq/nba?site=draftkings" target="_blank" rel="noopener">Build lineups in LineupHQ</a>
-  </div>
-
-  <div class="posbar" role="group" aria-label="Filter by position">
-    <button class="pos" type="button" data-pos="ALL" aria-pressed="true">All</button>
-    <button class="pos" type="button" data-pos="PG" aria-pressed="false">PG</button>
-    <button class="pos" type="button" data-pos="SG" aria-pressed="false">SG</button>
-    <button class="pos" type="button" data-pos="SF" aria-pressed="false">SF</button>
-    <button class="pos" type="button" data-pos="PF" aria-pressed="false">PF</button>
-    <button class="pos" type="button" data-pos="C" aria-pressed="false">C</button>
   </div>
 
   <div id="list" aria-live="polite"><div class="msg">Loading plays…</div></div>
@@ -128,8 +109,8 @@
 </div>
 
 <script>
-// ---- The page reads data.json, which sits next to index.html in the repo ----
-const DATA_FILE = "data.json";
+// ---- Data: nba_coreplays.json, pushed by NBACorePlays.py ----
+const DATA_URL = "nba_coreplays.json";
 const LOGO = abbr => "https://rical-images.s3.amazonaws.com/team-logos/nba/" + abbr + ".png";
 // If a logo is missing under one abbreviation, try the other common spelling.
 const ALIASES = { PHX: "PHO", PHO: "PHX", GS: "GSW", GSW: "GS", NO: "NOP", NOP: "NO", NY: "NYK", NYK: "NY",
@@ -139,44 +120,6 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Notes support **bold**; everything else is plain text.
 const notesHtml = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-
-// Small CSV parser that handles quoted cells, commas and line breaks inside quotes.
-function parseCSV(text) {
-  const rows = []; let row = [], cell = "", q = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (q) {
-      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
-      else cell += ch;
-    } else if (ch === '"') q = true;
-    else if (ch === ",") { row.push(cell); cell = ""; }
-    else if (ch === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
-    else if (ch !== "\r") cell += ch;
-  }
-  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
-  return rows;
-}
-
-// Turn the sheet into [{ group, plays: [...] }, ...]
-function toGroups(csv) {
-  const rows = parseCSV(csv);
-  if (!rows.length) return [];
-  const head = rows[0].map(h => h.trim().toLowerCase());
-  const col = n => head.indexOf(n);
-  const ix = { group: col("group"), rank: col("rank"), player: col("player"), tag: col("tag"), notes: col("notes"),
-               pos: col("listed pos"), team: col("team"), opp: col("opp"), salary: col("salary"), proj: col("proj") };
-  if (ix.player < 0) throw new Error("The sheet is missing a Player column.");
-  const get = (r, k) => (ix[k] >= 0 && r[ix[k]] != null ? String(r[ix[k]]).trim() : "");
-  const groups = []; let cur = null;
-  for (const r of rows.slice(1)) {
-    const g = get(r, "group"), p = get(r, "player");
-    if (g) { cur = { name: g, plays: [] }; groups.push(cur); continue; }
-    if (!p || !cur) continue;
-    cur.plays.push({ rank: get(r, "rank"), player: p, tag: get(r, "tag"), notes: get(r, "notes"), pos: get(r, "pos"),
-                     team: get(r, "team").toUpperCase(), opp: get(r, "opp").toUpperCase(), salary: get(r, "salary"), proj: get(r, "proj") });
-  }
-  return groups;
-}
 
 const money = v => { const n = Number(String(v).replace(/[$,]/g, "")); return isFinite(n) && v !== "" ? "$" + n.toLocaleString("en-US") : (v || "–"); };
 
@@ -197,9 +140,13 @@ function rowHtml(p) {
   const isCore = /^core/i.test(p.tag);
   const tag = p.tag ? '<span class="pill' + (isCore ? "" : " other") + '">' + esc(p.tag) + "</span>" : "";
   const meta = [p.pos, p.team].filter(v => v && !/^not found$/i.test(v)).join(" · ");
+  const sp = p.spread == null ? "" : (p.spread > 0 ? "+" : "") + p.spread;
+  const game = [sp, p.total == null ? "" : "O/U " + p.total].filter(Boolean).join(" · ");
+  const status = p.status ? '<div class="warn">' + esc(p.status) + "</div>" : "";
   return '<div class="row" data-tag="' + (isCore ? "core" : "") + '">' +
     '<div class="rank">' + esc(p.rank) + "</div>" +
     '<div class="who">' + logo(p.team) + "<div><div class=\"nm\">" + esc(p.player) + '</div><div class="mt">' + esc(meta) + "</div>" +
+      (game ? '<div class="mt">' + esc(game) + "</div>" : "") + status +
       (notFound ? '<div class="warn">Player not found on today’s slate</div>' : "") + "</div></div>" +
     '<div class="opp">' + logo(p.opp, true) + "<span>" + esc(/^not found$/i.test(p.opp) ? "" : p.opp) + "</span></div>" +
     '<div class="c tagc">' + tag + "</div>" +
@@ -208,20 +155,10 @@ function rowHtml(p) {
     '<div class="notes">' + notesHtml(p.notes) + "</div></div>";
 }
 
-const POS_OF = { "point guard": "PG", "shooting guard": "SG", "small forward": "SF", "power forward": "PF", "center": "C" };
-let pos = (new URLSearchParams(location.search).get("pos") || "ALL").toUpperCase();
-if (!["ALL", "PG", "SG", "SF", "PF", "C"].includes(pos)) pos = "ALL";
-let CURRENT = [];
-
 function render(groups) {
   const list = $("list");
-  const filled = groups.filter(g => g.plays.length && (pos === "ALL" || POS_OF[g.name.trim().toLowerCase()] === pos));
-  if (!filled.length) {
-    list.innerHTML = pos === "ALL"
-      ? '<div class="msg">No plays have been posted yet.<small>Check back soon.</small></div>'
-      : '<div class="msg">No ' + esc(pos) + ' plays have been posted yet.<small>Try another position or choose All.</small></div>';
-    return;
-  }
+  const filled = groups.filter(g => g.plays.length);
+  if (!filled.length) { list.innerHTML = '<div class="msg">No plays have been posted yet.<small>Check back soon.</small></div>'; return; }
   let html = '<div class="cols"><div>#</div><div>Player</div><div class="c">Opp</div><div class="c">Tag</div><div class="c">Salary</div><div class="c">Proj</div><div>Notes</div></div>';
   for (const g of filled) {
     html += '<div class="group"><h2>' + esc(g.name) + "</h2><span>" + g.plays.length + " play" + (g.plays.length === 1 ? "" : "s") + "</span></div>";
@@ -233,65 +170,15 @@ function render(groups) {
 const cache = {};
 let site = new URLSearchParams(location.search).get("site") === "fd" ? "fd" : "dk";
 
-// Add ?demo=1 to the page address to preview the design with sample plays (no sheet needed).
-const DEMO = new URLSearchParams(location.search).get("demo") === "1";
-const DEMO_CSV = [
-  "Group,Rank,Player,Tag,Notes,Listed Pos,Team,Opp,Salary,Proj",
-  "Point Guard,,,,,,,,,",
-  ",1,Sample Guard One,Core,**Sample note.** Replace this text with your own analysis.,PG,BOS,CHI,8800,46.5",
-  ",2,Sample Guard Two,Core,Another sample note about a great matchup.,PG/SG,DEN,MIA,6400,34.2",
-  ",3,Sample Guard Three,,A lower-priced option with a path to value.,PG,CHI,BOS,5200,27.1",
-  "Shooting Guard,,,,,,,,,",
-  ",1,Sample Wing One,Core,Projected for heavy minutes in a fast-paced game.,SG,MIA,DEN,7600,38.9",
-  ",2,Sample Wing Two,,Tournament play with upside.,SG/SF,BOS,CHI,6100,31.0",
-  "Small Forward,,,,,,,,,",
-  ",1,Sample Forward One,Core,Usage boost with a teammate out.,SF/PF,CHI,BOS,6900,35.4"
-].join("\n");
-
-let DATA = null;
-
-// "Wednesday, November 18 · Locks 7:00 PM ET"
-// Day and date come from data.date (YYYY-MM-DD) when it's set, otherwise from the update time in Eastern time.
-// The lock time comes from data.lock (for example "7:00 PM ET"). If it's missing, only the day and date show.
-function slateLine(data) {
-  let d = null;
-  if (data && /^\d{4}-\d{2}-\d{2}$/.test(data.date || "")) {
-    const [y, m, day] = data.date.split("-").map(Number);
-    d = new Date(y, m - 1, day, 12);
-  } else if (data && data.updated && !isNaN(new Date(data.updated))) {
-    const p = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(new Date(data.updated));
-    const g = t => Number(p.find(x => x.type === t).value);
-    d = new Date(g("year"), g("month") - 1, g("day"), 12);
-  }
-  if (!d) return "";
-  const when = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-  const lock = data && data.lock ? String(data.lock).trim() : "";
-  return lock ? when + " · Locks " + lock : when;
-}
-
-// "Updated Nov 18, 2:05 PM ET" (always Eastern time)
-function setUpdated(iso) {
-  const d = iso ? new Date(iso) : null;
-  if (!d || isNaN(d)) return;
-  const t = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(d);
-  $("updText").textContent = "Updated " + t + " ET";
-  $("upd").hidden = false;
-}
-
 async function load(s) {
-  if (DEMO) {
-    $("sub").textContent = slateLine({ date: new Date().toLocaleDateString("en-CA"), lock: "7:00 PM ET" });
-    setUpdated(new Date().toISOString());
-    return (cache[s] = toGroups(DEMO_CSV));
+  if (!cache.data) {
+    const res = await fetch(DATA_URL + "?t=" + Date.now());
+    if (!res.ok) throw new Error("The data file returned an error (" + res.status + ").");
+    cache.data = await res.json();
+    if (cache.data.updated) $("sub").textContent = "Our favorite plays by position. Updated " +
+      new Date(cache.data.updated).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   }
-  if (!DATA) {
-    const res = await fetch(DATA_FILE + "?t=" + Date.now());
-    if (!res.ok) throw new Error("The data file wasn’t found (" + res.status + ").");
-    DATA = await res.json();
-    $("sub").textContent = slateLine(DATA);
-    setUpdated(DATA.updated);
-  }
-  return DATA[s] || [];
+  return ((cache.data.sites || {})[s] || {}).groups || [];
 }
 
 async function show(s) {
@@ -299,7 +186,7 @@ async function show(s) {
   for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", String(b.dataset.site === s));
   $("hq").href = "https://rotogrinders.com/lineuphq/nba?site=" + (s === "fd" ? "fanduel" : "draftkings");
   $("list").innerHTML = '<div class="msg">Loading plays…</div>';
-  try { CURRENT = await load(s); render(CURRENT); }
+  try { render(await load(s)); }
   catch (e) {
     console.error(e);
     $("list").innerHTML = '<div class="msg err">Couldn’t load the plays.<small>' + esc(e.message || e) + " Refresh the page to try again.</small></div>";
@@ -310,17 +197,6 @@ for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", (
   const u = new URL(location.href); u.searchParams.set("site", b.dataset.site); history.replaceState(null, "", u);
   show(b.dataset.site);
 });
-for (const b of document.querySelectorAll(".pos")) {
-  b.setAttribute("aria-pressed", String(b.dataset.pos === pos));
-  b.addEventListener("click", () => {
-    pos = b.dataset.pos;
-    for (const x of document.querySelectorAll(".pos")) x.setAttribute("aria-pressed", String(x === b));
-    const u = new URL(location.href);
-    if (pos === "ALL") u.searchParams.delete("pos"); else u.searchParams.set("pos", pos);
-    history.replaceState(null, "", u);
-    render(CURRENT);
-  });
-}
 show(site);
 </script>
 </body>
