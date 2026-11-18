@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NBA Core Plays</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --panel: #f4f6fa; --line: #e1e5ec; --ink: #131a26; --muted: #627086;
+    --navy: #0b1f4f; --accent: #fe6a03; --core: #15803d; --bad: #b91c1c;
+    --head-bg: #0b1f4f; --head-ink: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10141c; --panel: #1a202b; --line: #2a3140; --ink: #eef1f6; --muted: #9aa5b8;
+      --navy: #0b1f4f; --accent: #ff7a1f; --core: #34d399; --bad: #f87171;
+      --head-bg: #243a82; --head-ink: #ffffff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.45 "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 18px 16px 28px; }
+
+  header { margin-bottom: 14px; }
+  h1 { margin: 0; font: 700 30px/1.1 "Barlow Condensed", "Barlow", Arial, sans-serif; letter-spacing: .2px; }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 12px 0 8px; }
+  .tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--panel); }
+  .tab { appearance: none; border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600;
+    padding: 7px 18px; border-radius: 999px; cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--head-bg); color: var(--head-ink); }
+  .tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .grow { flex: 1; }
+  .hq { background: var(--accent); color: #1a0d00; text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
+  .hq:hover { filter: brightness(1.08); }
+  .hq:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  .group { display: flex; align-items: baseline; gap: 10px; margin: 26px 0 8px; padding-bottom: 6px; border-bottom: 3px solid var(--accent); }
+  .group h2 { margin: 0; font: 700 22px/1.1 "Barlow Condensed", "Barlow", Arial, sans-serif; letter-spacing: .3px; }
+  .group span { color: var(--muted); font-size: 13px; }
+
+  .cols, .row {
+    display: grid; align-items: center; column-gap: 12px;
+    grid-template-columns: 30px minmax(190px, 1.1fr) 82px 66px 82px 66px 2.6fr;
+  }
+  .cols { padding: 6px 12px; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+  .cols .c { text-align: center; }
+  .row { padding: 12px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 6px; background: var(--bg); }
+  .row:hover { background: var(--panel); }
+  .row[data-tag="core"] { border-left: 4px solid var(--core); padding-left: 9px; }
+  .rank { color: var(--muted); font-weight: 700; }
+  .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .logo { width: 36px; height: 36px; object-fit: contain; flex: 0 0 36px; }
+  .logo.sm { width: 22px; height: 22px; flex-basis: 22px; }
+  .logo[hidden] { display: none; }
+  .nm { font-weight: 700; font-size: 16px; line-height: 1.2; }
+  .mt { color: var(--muted); font-size: 13px; }
+  .opp { display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; }
+  .c { text-align: center; }
+  .num { font-variant-numeric: tabular-nums; text-align: center; font-weight: 600; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--core); color: #06210f; }
+  .pill.other { background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
+  .notes { line-height: 1.45; }
+  .notes strong { font-weight: 700; }
+  .warn { color: var(--bad); font-size: 12px; margin-top: 2px; }
+  .m { display: none; }
+
+  .msg { padding: 30px 16px; text-align: center; color: var(--muted); }
+  .msg.err { color: var(--bad); }
+  .msg small { display: block; margin-top: 6px; color: var(--muted); }
+  footer { margin-top: 18px; color: var(--muted); font-size: 12.5px; }
+
+  @media (max-width: 760px) {
+    .cols { display: none; }
+    .row { grid-template-columns: 24px 1fr auto auto; row-gap: 8px; }
+    .opp, .tagc { display: none; }
+    .who { grid-column: 2 / 3; }
+    .num { text-align: right; }
+    .notes { grid-column: 1 / -1; }
+    .m { display: block; color: var(--muted); font-size: 11.5px; font-weight: 500; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title">NBA Core Plays</h1>
+    <div class="sub" id="sub">Our favorite plays by position.</div>
+  </header>
+
+  <div class="bar">
+    <div class="tabs" role="tablist" aria-label="Site">
+      <button class="tab" role="tab" id="tab-dk" data-site="dk" aria-selected="true">DraftKings</button>
+      <button class="tab" role="tab" id="tab-fd" data-site="fd" aria-selected="false">FanDuel</button>
+    </div>
+    <span class="grow"></span>
+    <a class="hq" id="hq" href="https://rotogrinders.com/lineuphq/nba?site=draftkings" target="_blank" rel="noopener">Build lineups in LineupHQ</a>
+  </div>
+
+  <div id="list" aria-live="polite"><div class="msg">Loading plays…</div></div>
+  <footer>Plays are listed in the writer’s order of preference within each position.</footer>
+</div>
+
+<script>
+// ---- The two published Google Sheet links (CSV) ----
+const SOURCES = {
+  dk: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZ7qhUr6riThogKeOaOpNOAiedZi2MIQQj_Icaua13NRWRUJG9jf-ywmSfpvIIz2WGBRxGQycqYK-w/pub?gid=0&single=true&output=csv",
+  fd: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZ7qhUr6riThogKeOaOpNOAiedZi2MIQQj_Icaua13NRWRUJG9jf-ywmSfpvIIz2WGBRxGQycqYK-w/pub?gid=1506073504&single=true&output=csv"
+};
+const LOGO = abbr => "https://rical-images.s3.amazonaws.com/team-logos/nba/" + abbr + ".png";
+// If a logo is missing under one abbreviation, try the other common spelling.
+const ALIASES = { PHX: "PHO", PHO: "PHX", GS: "GSW", GSW: "GS", NO: "NOP", NOP: "NO", NY: "NYK", NYK: "NY",
+                  SA: "SAS", SAS: "SA", UTAH: "UTA", UTA: "UTAH", WSH: "WAS", WAS: "WSH", BRK: "BKN", BKN: "BRK", CHO: "CHA", CHA: "CHO" };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// Notes support **bold**; everything else is plain text.
+const notesHtml = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+// Small CSV parser that handles quoted cells, commas and line breaks inside quotes.
+function parseCSV(text) {
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ",") { row.push(cell); cell = ""; }
+    else if (ch === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (ch !== "\r") cell += ch;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+// Turn the sheet into [{ group, plays: [...] }, ...]
+function toGroups(csv) {
+  const rows = parseCSV(csv);
+  if (!rows.length) return [];
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const col = n => head.indexOf(n);
+  const ix = { group: col("group"), rank: col("rank"), player: col("player"), tag: col("tag"), notes: col("notes"),
+               pos: col("listed pos"), team: col("team"), opp: col("opp"), salary: col("salary"), proj: col("proj") };
+  if (ix.player < 0) throw new Error("The sheet is missing a Player column.");
+  const get = (r, k) => (ix[k] >= 0 && r[ix[k]] != null ? String(r[ix[k]]).trim() : "");
+  const groups = []; let cur = null;
+  for (const r of rows.slice(1)) {
+    const g = get(r, "group"), p = get(r, "player");
+    if (g) { cur = { name: g, plays: [] }; groups.push(cur); continue; }
+    if (!p || !cur) continue;
+    cur.plays.push({ rank: get(r, "rank"), player: p, tag: get(r, "tag"), notes: get(r, "notes"), pos: get(r, "pos"),
+                     team: get(r, "team").toUpperCase(), opp: get(r, "opp").toUpperCase(), salary: get(r, "salary"), proj: get(r, "proj") });
+  }
+  return groups;
+}
+
+const money = v => { const n = Number(String(v).replace(/[$,]/g, "")); return isFinite(n) && v !== "" ? "$" + n.toLocaleString("en-US") : (v || "–"); };
+
+function logo(team, small) {
+  if (!team) return "";
+  return '<img class="logo' + (small ? " sm" : "") + '" src="' + esc(LOGO(team)) + '" alt="" loading="lazy" data-team="' + esc(team) + '">';
+}
+// Missing logo: try the alias spelling once, then hide the image.
+document.addEventListener("error", e => {
+  const el = e.target;
+  if (!(el instanceof HTMLImageElement) || !el.classList.contains("logo")) return;
+  const t = el.dataset.team, alt = ALIASES[t];
+  if (alt && !el.dataset.tried) { el.dataset.tried = "1"; el.src = LOGO(alt); } else el.hidden = true;
+}, true);
+
+function rowHtml(p) {
+  const notFound = [p.pos, p.team, p.opp, p.salary, p.proj].some(v => /^not found$/i.test(v));
+  const isCore = /^core/i.test(p.tag);
+  const tag = p.tag ? '<span class="pill' + (isCore ? "" : " other") + '">' + esc(p.tag) + "</span>" : "";
+  const meta = [p.pos, p.team].filter(v => v && !/^not found$/i.test(v)).join(" · ");
+  return '<div class="row" data-tag="' + (isCore ? "core" : "") + '">' +
+    '<div class="rank">' + esc(p.rank) + "</div>" +
+    '<div class="who">' + logo(p.team) + "<div><div class=\"nm\">" + esc(p.player) + '</div><div class="mt">' + esc(meta) + "</div>" +
+      (notFound ? '<div class="warn">Player not found on today’s slate</div>' : "") + "</div></div>" +
+    '<div class="opp">' + logo(p.opp, true) + "<span>" + esc(/^not found$/i.test(p.opp) ? "" : p.opp) + "</span></div>" +
+    '<div class="c tagc">' + tag + "</div>" +
+    '<div class="num"><span class="m">Salary</span>' + esc(money(p.salary)) + "</div>" +
+    '<div class="num"><span class="m">Proj</span>' + esc(/^not found$/i.test(p.proj) ? "–" : (p.proj || "–")) + "</div>" +
+    '<div class="notes">' + notesHtml(p.notes) + "</div></div>";
+}
+
+function render(groups) {
+  const list = $("list");
+  const filled = groups.filter(g => g.plays.length);
+  if (!filled.length) { list.innerHTML = '<div class="msg">No plays have been posted yet.<small>Check back soon.</small></div>'; return; }
+  let html = '<div class="cols"><div>#</div><div>Player</div><div class="c">Opp</div><div class="c">Tag</div><div class="c">Salary</div><div class="c">Proj</div><div>Notes</div></div>';
+  for (const g of filled) {
+    html += '<div class="group"><h2>' + esc(g.name) + "</h2><span>" + g.plays.length + " play" + (g.plays.length === 1 ? "" : "s") + "</span></div>";
+    html += g.plays.map(rowHtml).join("");
+  }
+  list.innerHTML = html;
+}
+
+const cache = {};
+let site = new URLSearchParams(location.search).get("site") === "fd" ? "fd" : "dk";
+
+async function load(s) {
+  if (!cache[s]) {
+    const res = await fetch(SOURCES[s] + "&t=" + Date.now());
+    if (!res.ok) throw new Error("The sheet returned an error (" + res.status + ").");
+    cache[s] = toGroups(await res.text());
+  }
+  return cache[s];
+}
+
+async function show(s) {
+  site = s;
+  for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", String(b.dataset.site === s));
+  $("hq").href = "https://rotogrinders.com/lineuphq/nba?site=" + (s === "fd" ? "fanduel" : "draftkings");
+  $("list").innerHTML = '<div class="msg">Loading plays…</div>';
+  try { render(await load(s)); }
+  catch (e) {
+    console.error(e);
+    $("list").innerHTML = '<div class="msg err">Couldn’t load the plays.<small>' + esc(e.message || e) + " Refresh the page to try again.</small></div>";
+  }
+}
+
+for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => {
+  const u = new URL(location.href); u.searchParams.set("site", b.dataset.site); history.replaceState(null, "", u);
+  show(b.dataset.site);
+});
+show(site);
+</script>
+</body>
+</html>
