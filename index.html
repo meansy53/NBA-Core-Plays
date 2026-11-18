@@ -11,15 +11,15 @@
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #ffffff; --panel: #f4f6fa; --line: #e1e5ec; --ink: #131a26; --muted: #627086;
-    --navy: #0b1f4f; --accent: #fe6a03; --core: #15803d; --bad: #b91c1c;
-    --head-bg: #0b1f4f; --head-ink: #ffffff;
+    --bg: #ffffff; --panel: #ECF0F2; --line: #d3dae0; --ink: #06184A; --muted: #5b6785;
+    --navy: #06184A; --silver: #ECF0F2; --accent: #FE6A03; --core: #15803d; --bad: #b91c1c;
+    --head-bg: #06184A; --head-ink: #ffffff; --btn-ink: #06184A;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #10141c; --panel: #1a202b; --line: #2a3140; --ink: #eef1f6; --muted: #9aa5b8;
-      --navy: #0b1f4f; --accent: #ff7a1f; --core: #34d399; --bad: #f87171;
-      --head-bg: #243a82; --head-ink: #ffffff;
+      --bg: #06184A; --panel: #0d2663; --line: #21367a; --ink: #ECF0F2; --muted: #a8b5d6;
+      --navy: #06184A; --silver: #ECF0F2; --accent: #FE6A03; --core: #34d399; --bad: #ff8a8a;
+      --head-bg: #FE6A03; --head-ink: #06184A; --btn-ink: #06184A;
     }
   }
   * { box-sizing: border-box; }
@@ -38,7 +38,13 @@
   .tab[aria-selected="true"] { background: var(--head-bg); color: var(--head-ink); }
   .tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   .grow { flex: 1; }
-  .hq { background: var(--accent); color: #1a0d00; text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
+  .posbar { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+  .pos { appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font: inherit; font-weight: 700;
+    padding: 6px 16px; border-radius: 999px; cursor: pointer; min-width: 52px; }
+  .pos:hover { color: var(--ink); }
+  .pos[aria-pressed="true"] { background: var(--head-bg); border-color: var(--head-bg); color: var(--head-ink); }
+  .pos:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .hq { background: var(--accent); color: var(--btn-ink); text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
   .hq:hover { filter: brightness(1.08); }
   .hq:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
@@ -104,6 +110,15 @@
     <a class="hq" id="hq" href="https://rotogrinders.com/lineuphq/nba?site=draftkings" target="_blank" rel="noopener">Build lineups in LineupHQ</a>
   </div>
 
+  <div class="posbar" role="group" aria-label="Filter by position">
+    <button class="pos" type="button" data-pos="ALL" aria-pressed="true">All</button>
+    <button class="pos" type="button" data-pos="PG" aria-pressed="false">PG</button>
+    <button class="pos" type="button" data-pos="SG" aria-pressed="false">SG</button>
+    <button class="pos" type="button" data-pos="SF" aria-pressed="false">SF</button>
+    <button class="pos" type="button" data-pos="PF" aria-pressed="false">PF</button>
+    <button class="pos" type="button" data-pos="C" aria-pressed="false">C</button>
+  </div>
+
   <div id="list" aria-live="polite"><div class="msg">Loading plays…</div></div>
   <footer>Plays are listed in the writer’s order of preference within each position.</footer>
 </div>
@@ -155,10 +170,21 @@ function rowHtml(p) {
     '<div class="notes">' + notesHtml(p.notes) + "</div></div>";
 }
 
+const POS_OF = { "point guard": "PG", "shooting guard": "SG", "small forward": "SF", "power forward": "PF", "center": "C",
+                 "pg": "PG", "sg": "SG", "sf": "SF", "pf": "PF", "c": "C" };
+let pos = (new URLSearchParams(location.search).get("pos") || "ALL").toUpperCase();
+if (!["ALL", "PG", "SG", "SF", "PF", "C"].includes(pos)) pos = "ALL";
+let CURRENT = [];
+
 function render(groups) {
   const list = $("list");
-  const filled = groups.filter(g => g.plays.length);
-  if (!filled.length) { list.innerHTML = '<div class="msg">No plays have been posted yet.<small>Check back soon.</small></div>'; return; }
+  const filled = groups.filter(g => g.plays.length && (pos === "ALL" || POS_OF[String(g.name).trim().toLowerCase()] === pos));
+  if (!filled.length) {
+    list.innerHTML = pos === "ALL"
+      ? '<div class="msg">No plays have been posted yet.<small>Check back soon.</small></div>'
+      : '<div class="msg">No ' + esc(pos) + ' plays have been posted yet.<small>Try another position or choose All.</small></div>';
+    return;
+  }
   let html = '<div class="cols"><div>#</div><div>Player</div><div class="c">Opp</div><div class="c">Tag</div><div class="c">Salary</div><div class="c">Proj</div><div>Notes</div></div>';
   for (const g of filled) {
     html += '<div class="group"><h2>' + esc(g.name) + "</h2><span>" + g.plays.length + " play" + (g.plays.length === 1 ? "" : "s") + "</span></div>";
@@ -186,7 +212,7 @@ async function show(s) {
   for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", String(b.dataset.site === s));
   $("hq").href = "https://rotogrinders.com/lineuphq/nba?site=" + (s === "fd" ? "fanduel" : "draftkings");
   $("list").innerHTML = '<div class="msg">Loading plays…</div>';
-  try { render(await load(s)); }
+  try { CURRENT = await load(s); render(CURRENT); }
   catch (e) {
     console.error(e);
     $("list").innerHTML = '<div class="msg err">Couldn’t load the plays.<small>' + esc(e.message || e) + " Refresh the page to try again.</small></div>";
@@ -197,6 +223,17 @@ for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", (
   const u = new URL(location.href); u.searchParams.set("site", b.dataset.site); history.replaceState(null, "", u);
   show(b.dataset.site);
 });
+for (const b of document.querySelectorAll(".pos")) {
+  b.setAttribute("aria-pressed", String(b.dataset.pos === pos));
+  b.addEventListener("click", () => {
+    pos = b.dataset.pos;
+    for (const x of document.querySelectorAll(".pos")) x.setAttribute("aria-pressed", String(x === b));
+    const u = new URL(location.href);
+    if (pos === "ALL") u.searchParams.delete("pos"); else u.searchParams.set("pos", pos);
+    history.replaceState(null, "", u);
+    render(CURRENT);
+  });
+}
 show(site);
 </script>
 </body>
