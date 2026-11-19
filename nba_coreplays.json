@@ -1,122 +1,13 @@
 {
  "title": "NBA Core Plays",
- "updated": "2026-11-18T16:48-05:00",
- "stage_date": "2026-11-18",
+ "updated": "2026-11-19T08:14-05:00",
+ "stage_date": "2026-11-19",
  "sites": {
   "dk": {
    "groups": [
     {
      "name": "Point Guard",
-     "plays": [
-      {
-       "rank": "1",
-       "player": "Nolan Traore",
-       "tag": "Strong",
-       "notes": "He aight.",
-       "pos": "SG/SF",
-       "team": "BKN",
-       "opp": "CHI",
-       "salary": "4800",
-       "proj": "25.7",
-       "found": true,
-       "minutes": 26.74,
-       "status": "B",
-       "order": 2,
-       "spread": -2.5,
-       "total": 239.5,
-       "ml": -142.0
-      },
-      {
-       "rank": "2",
-       "player": "Cade Cunningham",
-       "tag": "",
-       "notes": "",
-       "pos": "PG",
-       "team": "DET",
-       "opp": "NOP",
-       "salary": "10000",
-       "proj": "55.2",
-       "found": true,
-       "minutes": 37.55,
-       "status": "B",
-       "order": 1,
-       "spread": -4.5,
-       "total": 226.5,
-       "ml": -191.0
-      },
-      {
-       "rank": "3",
-       "player": "Immanuel Quickley",
-       "tag": "",
-       "notes": "",
-       "pos": "PG",
-       "team": "TOR",
-       "opp": "WAS",
-       "salary": "6800",
-       "proj": "41.2",
-       "found": true,
-       "minutes": 32.7,
-       "status": "B",
-       "order": 1,
-       "spread": -5.5,
-       "total": 225.5,
-       "ml": -191.0
-      },
-      {
-       "rank": "4",
-       "player": "Daniss Jenkins",
-       "tag": "",
-       "notes": "",
-       "pos": "PG/SG",
-       "team": "DET",
-       "opp": "NOP",
-       "salary": "6200",
-       "proj": "33.3",
-       "found": true,
-       "minutes": 35.96,
-       "status": "B",
-       "order": 2,
-       "spread": -4.5,
-       "total": 226.5,
-       "ml": -191.0
-      },
-      {
-       "rank": "5",
-       "player": "James Harden",
-       "tag": "",
-       "notes": "",
-       "pos": "PG",
-       "team": "CLE",
-       "opp": "MEM",
-       "salary": "7500",
-       "proj": "36.4",
-       "found": true,
-       "minutes": 32.65,
-       "status": "B",
-       "order": 1,
-       "spread": -4.5,
-       "total": 238.5,
-       "ml": -196.0
-      },
-      {
-       "rank": "6",
-       "player": "Tyler Herro",
-       "tag": "",
-       "notes": "",
-       "pos": "PG/SG",
-       "team": "MIL",
-       "opp": "MIA",
-       "salary": "7400",
-       "proj": "35.8",
-       "found": true,
-       "minutes": 30.75,
-       "status": "B",
-       "order": 2,
-       "spread": 11.5,
-       "total": 235.5,
-       "ml": 483.0
-      }
-     ]
+     "plays": []
     },
     {
      "name": "Shooting Guard",
@@ -140,26 +31,7 @@
    "groups": [
     {
      "name": "Point Guard",
-     "plays": [
-      {
-       "rank": "1",
-       "player": "James Harden",
-       "tag": "Core",
-       "notes": "Test note",
-       "pos": "PG",
-       "team": "CLE",
-       "opp": "MEM",
-       "salary": "7300",
-       "proj": "34.9",
-       "found": true,
-       "minutes": 32.65,
-       "status": "B",
-       "order": 1,
-       "spread": -4.5,
-       "total": 237.5,
-       "ml": -194.0
-      }
-     ]
+     "plays": []
     },
     {
      "name": "Shooting Guard",
@@ -167,98 +39,7 @@
     },
     {
      "name": "Small Forward",
-     "plays": [
-      {
-       "rank": "1",
-       "player": "RJ Barrett",
-       "tag": "",
-       "notes": "",
-       "pos": "SG/SF",
-       "team": "TOR",
-       "opp": "WAS",
-       "salary": "6900",
-       "proj": "41.2",
-       "found": true,
-       "minutes": 34.73,
-       "status": "B",
-       "order": 3,
-       "spread": -4.5,
-       "total": 225.5,
-       "ml": -190.0
-      },
-      {
-       "rank": "2",
-       "player": "Ausar Thompson",
-       "tag": "",
-       "notes": "",
-       "pos": "SF/SG",
-       "team": "DET",
-       "opp": "NOP",
-       "salary": "6600",
-       "proj": "39.0",
-       "found": true,
-       "minutes": 32.21,
-       "status": "B",
-       "order": 4,
-       "spread": -4.5,
-       "total": 225.5,
-       "ml": -176.0
-      },
-      {
-       "rank": "3",
-       "player": "Michael Porter Jr.",
-       "tag": "",
-       "notes": "",
-       "pos": "SF",
-       "team": "BKN",
-       "opp": "CHI",
-       "salary": "7100",
-       "proj": "38.5",
-       "found": true,
-       "minutes": 33.82,
-       "status": "B",
-       "order": 3,
-       "spread": -2.5,
-       "total": 239.5,
-       "ml": -142.0
-      },
-      {
-       "rank": "4",
-       "player": "Kevin Huerter",
-       "tag": "",
-       "notes": "",
-       "pos": "SG/SF",
-       "team": "DET",
-       "opp": "NOP",
-       "salary": "4900",
-       "proj": "28.6",
-       "found": true,
-       "minutes": 33.79,
-       "status": "B",
-       "order": 3,
-       "spread": -4.5,
-       "total": 225.5,
-       "ml": -176.0
-      },
-      {
-       "rank": "5",
-       "player": "Kyle Kuzma",
-       "tag": "",
-       "notes": "",
-       "pos": "SF/PF",
-       "team": "MIL",
-       "opp": "MIA",
-       "salary": "4600",
-       "proj": "24.5",
-       "found": true,
-       "minutes": 27.31,
-       "status": "B",
-       "order": 3,
-       "spread": 11.5,
-       "total": 236.5,
-       "ml": 490.0
-      }
-     ]
+     "plays": []
     },
     {
      "name": "Power Forward",
